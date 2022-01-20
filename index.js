@@ -13,7 +13,6 @@ var map_columns = 16;
 var map_scale = 1;
 var pointer = { x:map_columns * tile_size * 0.5, y:0, down:false };
 var floor = canvas.height - canvas.height/23
-//this is a test 1.2
 
 // Mouse Interactivity
 let canvasPosition = canvas.getBoundingClientRect();
