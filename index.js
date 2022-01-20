@@ -12,7 +12,7 @@ var tile_size = 16;
 var map_columns = 16;
 var map_scale = 1;
 var pointer = { x:map_columns * tile_size * 0.5, y:0, down:false };
-var floor = canvas.height - canvas.height/23;
+var floor = canvas.height - canvas.height/23
 
 // Mouse Interactivity
 let canvasPosition = canvas.getBoundingClientRect();
@@ -44,11 +44,15 @@ canvas.addEventListener("click", (event) => {
 
 });
 
+function between(x, min, max) {
+    return x >= min && x <= max;
+  }
+
 // Player 
 const playerLeft = new Image();
-playerLeft.src = 'monkey4.png';
+playerLeft.src = 'Images/monkey4.png';
 const playerRight = new Image();
-playerRight.src = 'monkey3.png';
+playerRight.src = 'Images/monkey3.png';
 
 const gravity = 1.5;
 
@@ -78,7 +82,7 @@ class Player {
         c.fillRect(this.position.x, this.position.y, this.spriteWidth, this.spriteHeight);
 */
 
-        if( this.position.x >= mouse.x){
+        if( this.position.x >= banana.position.x){
             c.drawImage(playerLeft,  this.position.x - 35, 
                 this.position.y - 45, this.radius*3, this.radius*3);
         } else {
@@ -101,19 +105,21 @@ class Player {
         } else {
             this.velocity.y = 0;
         }
-        
-       //this.velocity.y += gravity;
 
+        var bananaPositionXCorrection = banana.position.x - 8.1
 
-        if (pointer.down && !this.jumping && pointer.y < this.position.y) {
+        console.log(bananaPositionXCorrection - this.position.x, this.position.x - bananaPositionXCorrection)
+        if ( !this.jumping && this.position.y > banana.position.y &&
+             (between(bananaPositionXCorrection - this.position.x, -3, 3)
+             || between(this.position.x - bananaPositionXCorrection , -3, 3))) {
             this.jumping = true;
             this.velocity.y =  -15;
         }
-    
+
         if (this.jumping){
-            this.velocity.x = (pointer.x - this.position.x - tile_size * 2) * 0.05; 
+            this.velocity.x = (banana.position.x - this.position.x - tile_size * 2) * 0.05; 
             pointer.down = false;
-        }else{ this.velocity.x = (pointer.x - this.position.x - tile_size * 0.5) * 0.025; }
+        }else{ this.velocity.x = (banana.position.x - this.position.x - tile_size * 0.5) * 0.025; }
     
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
@@ -128,9 +134,9 @@ const player = new Player();
 
 // Banana
 const bananaPic = new Image();
-bananaPic.src = 'banana4.png';
+bananaPic.src = 'Images/banana4.png';
 const aura = new Image();
-aura.src = 'aura.png';
+aura.src = 'Images/aura.png';
 
 class Banana {
     constructor() {
@@ -159,7 +165,7 @@ class Banana {
         const dx = this.position.x - mouse.x
         const dy = this.position.y - mouse.y
         let distance = Math.sqrt(dx*dx + dy*dy);
-        if(distance < this.radius+50 && mouse.click){
+        if(distance < this.radius+200 && mouse.click){
             this.position.x = mouse.x;
             this.position.y = mouse.y;
         }
@@ -169,7 +175,7 @@ const banana = new Banana();
 
 // Background
 const backgroundTrees = new Image();
-backgroundTrees.src = 'treebackground.png';
+backgroundTrees.src = 'Images/treebackground.png';
 
 function handleBackground(){
     c.drawImage(backgroundTrees, 0, 0, canvas.width, canvas.height);
