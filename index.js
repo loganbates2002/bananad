@@ -38,13 +38,15 @@ function between(x, min, max) {
   }
 
 // Player 
+/*
 const playerLeft = new Image();
 playerLeft.src = 'Images/monkey4.png';
 const playerRight = new Image();
 playerRight.src = 'Images/monkey3.png';
-const spriteSheet = newImage();
-spriteSheet = 'Images/MonkeySpriteSheet.png';
+*/
 
+const spriteSheet = new Image();
+spriteSheet.src = 'Images/MonkeySpriteSheetRed.png';
 const gravity = 1.5;
 
 class Player {
@@ -60,10 +62,10 @@ class Player {
         this.radius = 30;
         this.angle = 0;
         this.frameX = 0;
-        this.frameY = 0;
+        this.frameY = 1;
         this.frame = 0;
-        this.spriteWidth = 27;
-        this.spriteHeight = 31;
+        this.spriteWidth = 46;
+        this.spriteHeight = 52;
         //this.behavior = behavior;
         this.jumping = true;
         this.jumpingHeight = -17;
@@ -85,17 +87,18 @@ class Player {
     }
 
     draw(){
-        /* draw hitbox
+        // draw hitbox
         c.fillStyle = 'blue';
-        c.fillRect(this.hitboxPositionX, this.hitboxPositionY, this.hitboxWidth, this.hitboxHeight); */
+        c.fillRect(this.hitboxPositionX, this.hitboxPositionY, this.hitboxWidth, this.hitboxHeight); 
 
         if( this.position.x >= banana.position.x){
-            c.drawImage(playerLeft,  this.position.x - 35, 
-                this.position.y - 45, this.radius*3, this.radius*3);
+            c.drawImage(spriteSheet, this.spriteWidth * this.frameX, this.spriteHeight * this.frameY,
+                this.spriteWidth, this.spriteHeight, this.position.x-35, 
+                this.position.y - 61, this.radius*3, this.radius*3.5);
         } else {
-            c.drawImage(playerRight,
-                this.position.x - 35, this.position.y - 45, this.radius*3, 
-                this.radius*3);
+            c.drawImage(spriteSheet, this.spriteWidth * this.frameX, this.spriteHeight * (this.frameY+1),
+                this.spriteWidth, this.spriteHeight, this.position.x-35, 
+                this.position.y - 54, this.radius*3, this.radius*3.5);
         }
     }
     update(players, currentIndex){
@@ -131,14 +134,14 @@ class Player {
             }
         })
 
-        if(this.position.y + this.spriteHeight + this.velocity.y <= canvas.height ){
+        if(this.position.y + (this.spriteHeight-20) + this.velocity.y <= canvas.height ){
             this.velocity.y += gravity/2;
         } else {
             this.velocity.y = 0;
         }
 
         // jump when directly under banana
-        if ( gameFrame % 200 ==0 && !this.jumping && this.position.y > banana.position.y &&
+        if (!this.jumping && this.position.y > banana.position.y &&
              (between(bananaPositionXCorrection - this.position.x, -3, 3)
              || between(this.position.x - bananaPositionXCorrection , -3, 3))) {
             this.jumping = true;
@@ -155,6 +158,7 @@ class Player {
         
         if(this.onHitbox){
             this.position.y = holdY;
+            this.jumping = false;
         }
         this.hitboxPositionX = this.position.x;
         this.hitboxPositionY = this.position.y;
@@ -230,6 +234,7 @@ function animate(){
         currentIndex = players.indexOf(player);
         player.update(players, currentIndex);
     })
+    console.log(player1.jumping, player1.onHitbox);
     banana.update();
 }
 
