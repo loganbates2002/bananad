@@ -11,7 +11,7 @@ var friction = 1;
 var tile_size = 16;
 var map_columns = 16;
 var map_scale = 1;
-var floor = canvas.height - canvas.height/23
+var floor = canvas.height - canvas.height/25
 
 // Mouse Interactivity
 let canvasPosition = canvas.getBoundingClientRect();
@@ -42,6 +42,8 @@ const playerLeft = new Image();
 playerLeft.src = 'Images/monkey4.png';
 const playerRight = new Image();
 playerRight.src = 'Images/monkey3.png';
+const spriteSheet = newImage();
+spriteSheet = 'Images/MonkeySpriteSheet.png';
 
 const gravity = 1.5;
 
