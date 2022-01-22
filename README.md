@@ -1,3 +1,3 @@
 # bananad
 
-web game coded in javascript
+Web game coded in javascript

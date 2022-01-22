@@ -11,7 +11,6 @@ var friction = 1;
 var tile_size = 16;
 var map_columns = 16;
 var map_scale = 1;
-var pointer = { x:map_columns * tile_size * 0.5, y:0, down:false };
 var floor = canvas.height - canvas.height/23
 
 // Mouse Interactivity
@@ -34,16 +33,6 @@ canvas.addEventListener('mouseup', function(){
     mouse.click = false;
     dragging = false;
 })
-canvas.addEventListener("click", (event) => {
-
-    var rectangle = event.target.getBoundingClientRect();
-
-    pointer.x = (event.pageX - rectangle.left) / map_scale;
-    pointer.y = (event.pageY - rectangle.top) / map_scale;
-    pointer.down = true;
-
-});
-
 function between(x, min, max) {
     return x >= min && x <= max;
   }
@@ -59,8 +48,8 @@ const gravity = 1.5;
 class Player {
     constructor(){
         this.position = {
-            x: 100,
-            y: 100
+            x: 0,
+            y: canvas.height
         };
         this.velocity = {
             x: 0,
@@ -75,12 +64,28 @@ class Player {
         this.spriteHeight = 31;
         //this.behavior = behavior;
         this.jumping = true;
+        this.jumpingHeight = -17;
+        this.speed = 0.025;
+        this.hitboxHeight = 30;
+        this.hitboxWidth = 35;
+        this.hitboxPositionX = this.position.x;
+        this.hitboxPositionY = this.position.y;
+        this.onHitbox = false;
     }
+    setPositionX(x){
+        this.position.x = x;
+    }
+    setJumpingHeight(x){
+        this.jumpingHeight = x;
+    }
+    setSpeed(x){
+        this.speed = x;
+    }
+
     draw(){
-        /*
-        c.fillStyle = 'red';
-        c.fillRect(this.position.x, this.position.y, this.spriteWidth, this.spriteHeight);
-*/
+        /* draw hitbox
+        c.fillStyle = 'blue';
+        c.fillRect(this.hitboxPositionX, this.hitboxPositionY, this.hitboxWidth, this.hitboxHeight); */
 
         if( this.position.x >= banana.position.x){
             c.drawImage(playerLeft,  this.position.x - 35, 
@@ -91,45 +96,77 @@ class Player {
                 this.radius*3);
         }
     }
-    update(){
+    update(players, currentIndex){
         this.draw();
 
         const dx = this.position.x - mouse.x;
         const dy = this.position.y - mouse.y;
         let theta = Math.atan2(dy, dx);
         this.angle = theta;
-        
-        this.position.y += this.velocity.y;
-        if(this.position.y + this.spriteHeight + this.velocity.y <= canvas.height){
-            this.velocity.y += gravity/1.5;
+        var bananaPositionXCorrection = banana.position.x - 8.1
+        var holdY = 0;
+
+        //Player collision detection
+        players.forEach((monkey) => {
+            if(players.indexOf(monkey) != currentIndex){
+                if(!monkey.jumping){  
+                    if(this.hitboxPositionY + this.hitboxHeight <= monkey.hitboxPositionY 
+                        && this.hitboxPositionY + this.hitboxHeight + this.velocity.y >= monkey.hitboxPositionY
+                        && this.hitboxPositionX + this.hitboxWidth >= monkey.hitboxPositionX
+                        && this.hitboxPositionX <= monkey.hitboxPositionX + monkey.hitboxWidth){
+                            this.velocity.y = 0;
+                            this.velocity.x = 0;
+                            this.jumping = false;
+                            this.onHitbox = true;
+                            holdY = this.position.y;
+                            //console.log("hit");
+                    } else {
+                        this.onHitbox = false;
+                    }
+                } else {
+                    this.onHitbox = false;
+                }
+            }
+        })
+
+        if(this.position.y + this.spriteHeight + this.velocity.y <= canvas.height ){
+            this.velocity.y += gravity/2;
         } else {
             this.velocity.y = 0;
         }
 
-        var bananaPositionXCorrection = banana.position.x - 8.1
-
-        console.log(bananaPositionXCorrection - this.position.x, this.position.x - bananaPositionXCorrection)
-        if ( !this.jumping && this.position.y > banana.position.y &&
+        // jump when directly under banana
+        if ( gameFrame % 200 ==0 && !this.jumping && this.position.y > banana.position.y &&
              (between(bananaPositionXCorrection - this.position.x, -3, 3)
              || between(this.position.x - bananaPositionXCorrection , -3, 3))) {
             this.jumping = true;
-            this.velocity.y =  -15;
+            this.velocity.y =  this.jumpingHeight;
         }
-
-        if (this.jumping){
-            this.velocity.x = (banana.position.x - this.position.x - tile_size * 2) * 0.05; 
-            pointer.down = false;
-        }else{ this.velocity.x = (banana.position.x - this.position.x - tile_size * 0.5) * 0.025; }
+        if (this.jumping){ this.velocity.x = (banana.position.x - this.position.x - tile_size * 2) * 0.05; 
+        }else{ this.velocity.x = (banana.position.x - this.position.x - tile_size * 0.5) * this.speed; }
     
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
-    
         this.velocity.y *= friction;
     
         if (this.position.y > floor) { this.position.y = floor; this.jumping = false; }
+        
+        if(this.onHitbox){
+            this.position.y = holdY;
+        }
+        this.hitboxPositionX = this.position.x;
+        this.hitboxPositionY = this.position.y;
     }
 }
-const player = new Player();
+const player1 = new Player();
+const player2 = new Player();
+const player3 = new Player();
+const players = [player1,player2, player3];
+player2.setPositionX(canvas.width);
+player2.setSpeed(0.08);
+player2.setJumpingHeight(-14);
+player3.setSpeed(0.02);
+player3.setJumpingHeight(-15);
 
 
 // Banana
@@ -186,7 +223,11 @@ function animate(){
     requestAnimationFrame(animate);
     c.clearRect(0,0, canvas.width, canvas.height);
     handleBackground();
-    player.update();
+
+    players.forEach((player) => {
+        currentIndex = players.indexOf(player);
+        player.update(players, currentIndex);
+    })
     banana.update();
 }
 
