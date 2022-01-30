@@ -5,6 +5,7 @@ canvas.height = window.innerHeight;
 
 let gameFrame = 0;
 let gameSpeed = 1;
+let staggerFrames = 5;
 gameOver = false;
 dragging = false;
 var friction = 1;
@@ -61,15 +62,15 @@ class Player {
         };
         this.radius = 30;
         this.angle = 0;
-        this.frameX = 0;
+        this.frameX = 3;
         this.frameY = 1;
         this.frame = 0;
-        this.spriteWidth = 46;
+        this.spriteWidth = 49;
         this.spriteHeight = 52;
         //this.behavior = behavior;
         this.jumping = true;
-        this.jumpingHeight = -17;
-        this.speed = 0.025;
+        this.jumpingHeight = -35;
+        this.speed = 0.01;
         this.hitboxHeight = 30;
         this.hitboxWidth = 35;
         this.hitboxPositionX = this.position.x;
@@ -87,15 +88,16 @@ class Player {
     }
 
     draw(){
-        // draw hitbox
+        /* draw hitbox
         c.fillStyle = 'blue';
-        c.fillRect(this.hitboxPositionX, this.hitboxPositionY, this.hitboxWidth, this.hitboxHeight); 
+        c.fillRect(this.hitboxPositionX, this.hitboxPositionY, this.hitboxWidth, this.hitboxHeight); */
 
         if( this.position.x >= banana.position.x){
             c.drawImage(spriteSheet, this.spriteWidth * this.frameX, this.spriteHeight * this.frameY,
                 this.spriteWidth, this.spriteHeight, this.position.x-35, 
                 this.position.y - 61, this.radius*3, this.radius*3.5);
         } else {
+            if(this.frameY == 3){ this.frameY = 2;}
             c.drawImage(spriteSheet, this.spriteWidth * this.frameX, this.spriteHeight * (this.frameY+1),
                 this.spriteWidth, this.spriteHeight, this.position.x-35, 
                 this.position.y - 54, this.radius*3, this.radius*3.5);
@@ -103,6 +105,25 @@ class Player {
     }
     update(players, currentIndex){
         this.draw();
+
+        //loops through frames of sprite sheet
+        console.log(this.jumpingHeight, this.velocity.y);
+        if(this.velocity.y < 0 && this.jumping){ 
+            this.frameY = 3;
+        }else if(this.velocity.y > 0){
+            this.frameY = 0;
+        }else{
+            this.frameY = 1;
+        }
+            if(this.frame % staggerFrames == 0 ){
+                if(this.frameX > 0){ 
+                    this.frameX--; 
+                } else { 
+                    this.frameX = 3; 
+                }
+            }
+        this.frame ++;
+        
 
         const dx = this.position.x - mouse.x;
         const dy = this.position.y - mouse.y;
@@ -114,7 +135,7 @@ class Player {
         //Player collision detection
         players.forEach((monkey) => {
             if(players.indexOf(monkey) != currentIndex){
-                if(!monkey.jumping){  
+                if((!monkey.jumping) || this.onHitbox == false){  
                     if(this.hitboxPositionY + this.hitboxHeight <= monkey.hitboxPositionY 
                         && this.hitboxPositionY + this.hitboxHeight + this.velocity.y >= monkey.hitboxPositionY
                         && this.hitboxPositionX + this.hitboxWidth >= monkey.hitboxPositionX
@@ -136,8 +157,10 @@ class Player {
 
         if(this.position.y + (this.spriteHeight-20) + this.velocity.y <= canvas.height ){
             this.velocity.y += gravity/2;
+            //this.jumping = false;
         } else {
             this.velocity.y = 0;
+            //this.jumping = false;
         }
 
         // jump when directly under banana
@@ -148,13 +171,17 @@ class Player {
             this.velocity.y =  this.jumpingHeight;
         }
         if (this.jumping){ this.velocity.x = (banana.position.x - this.position.x - tile_size * 2) * 0.05; 
-        }else{ this.velocity.x = (banana.position.x - this.position.x - tile_size * 0.5) * this.speed; }
+        }else{ 
+            this.velocity.x = (banana.position.x - this.position.x /*- tile_size * .5*/) * this.speed; 
+            //this.jumping = false;
+        }
     
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
         this.velocity.y *= friction;
     
         if (this.position.y > floor) { this.position.y = floor; this.jumping = false; }
+        if (this.velocity.y == 0) { this.jumping = false; }
         
         if(this.onHitbox){
             this.position.y = holdY;
@@ -162,6 +189,8 @@ class Player {
         }
         this.hitboxPositionX = this.position.x;
         this.hitboxPositionY = this.position.y;
+
+
     }
 }
 const player1 = new Player();
@@ -171,7 +200,7 @@ const players = [player1,player2, player3];
 player2.setPositionX(canvas.width);
 player2.setSpeed(0.08);
 player2.setJumpingHeight(-14);
-player3.setSpeed(0.02);
+player3.setSpeed(0.012);
 player3.setJumpingHeight(-15);
 
 
@@ -234,8 +263,10 @@ function animate(){
         currentIndex = players.indexOf(player);
         player.update(players, currentIndex);
     })
-    console.log(player1.jumping, player1.onHitbox);
+    //console.log(player1.jumping, player1.onHitbox);
     banana.update();
+    //console.log(player1.velocity.y);
+    gameFrame++;
 }
 
 animate();
