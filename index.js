@@ -5,13 +5,14 @@ canvas.height = window.innerHeight;
 
 let gameFrame = 0;
 let gameSpeed = 1;
+let staggerFrames = 10;
 gameOver = false;
 dragging = false;
 var friction = 1;
 var tile_size = 16;
 var map_columns = 16;
 var map_scale = 1;
-var floor = canvas.height - canvas.height/23
+var floor = canvas.height - canvas.height/25
 
 // Mouse Interactivity
 let canvasPosition = canvas.getBoundingClientRect();
@@ -38,11 +39,8 @@ function between(x, min, max) {
   }
 
 // Player 
-const playerLeft = new Image();
-playerLeft.src = 'Images/monkey4.png';
-const playerRight = new Image();
-playerRight.src = 'Images/monkey3.png';
-
+const spriteSheet = new Image();
+spriteSheet.src = 'Images/MonkeySpriteSheetRed.png';
 const gravity = 1.5;
 
 class Player {
@@ -57,14 +55,13 @@ class Player {
         };
         this.radius = 30;
         this.angle = 0;
-        this.frameX = 0;
-        this.frameY = 0;
+        this.frameX = 3;
+        this.frameY = 1;
         this.frame = 0;
-        this.spriteWidth = 27;
-        this.spriteHeight = 31;
-        //this.behavior = behavior;
+        this.spriteWidth = 49;
+        this.spriteHeight = 52;
         this.jumping = true;
-        this.jumpingHeight = -17;
+        this.jumpingHeight = -15;
         this.speed = 0.025;
         this.hitboxHeight = 30;
         this.hitboxWidth = 35;
@@ -88,16 +85,42 @@ class Player {
         c.fillRect(this.hitboxPositionX, this.hitboxPositionY, this.hitboxWidth, this.hitboxHeight); */
 
         if( this.position.x >= banana.position.x){
-            c.drawImage(playerLeft,  this.position.x - 35, 
-                this.position.y - 45, this.radius*3, this.radius*3);
+            c.drawImage(spriteSheet, this.spriteWidth * this.frameX, this.spriteHeight * this.frameY,
+                this.spriteWidth, this.spriteHeight, this.position.x-35, 
+                this.position.y - 61, this.radius*3, this.radius*3.5);
         } else {
-            c.drawImage(playerRight,
-                this.position.x - 35, this.position.y - 45, this.radius*3, 
-                this.radius*3);
+            if(this.frameY == 1){ this.frameY = 2;}
+            c.drawImage(spriteSheet, this.spriteWidth * this.frameX, this.spriteHeight * this.frameY,
+                this.spriteWidth, this.spriteHeight, this.position.x-35, 
+                this.position.y - 54, this.radius*3, this.radius*3.5);
+        }
+    }
+    spriteSheetAnimation(){
+        if(this.velocity.y < 0){ 
+            this.frameY = 3;
+        }else if(this.velocity.y > 0){
+            this.frameY = 0;
+        }else{
+            this.frameY = 1;
+        }
+        var xVelocityInt = parseInt(this.velocity.x, 10)
+        console.log(xVelocityInt)
+        if(this.frame % (staggerFrames / Math.abs(xVelocityInt)) == 0 ){
+            if(this.frameX > 0){ 
+                this.frameX--; 
+            } else { 
+                this.frameX = 3; 
+            }
         }
     }
     update(players, currentIndex){
+        this.spriteSheetAnimation();
         this.draw();
+
+        //loops through frames of sprite sheet
+        //console.log(this.jumpingHeight, this.velocity.y);
+        this.frame ++;
+        
 
         const dx = this.position.x - mouse.x;
         const dy = this.position.y - mouse.y;
@@ -109,7 +132,7 @@ class Player {
         //Player collision detection
         players.forEach((monkey) => {
             if(players.indexOf(monkey) != currentIndex){
-                if(!monkey.jumping){  
+                if((!monkey.jumping) || this.onHitbox == false){  
                     if(this.hitboxPositionY + this.hitboxHeight <= monkey.hitboxPositionY 
                         && this.hitboxPositionY + this.hitboxHeight + this.velocity.y >= monkey.hitboxPositionY
                         && this.hitboxPositionX + this.hitboxWidth >= monkey.hitboxPositionX
@@ -129,33 +152,40 @@ class Player {
             }
         })
 
-        if(this.position.y + this.spriteHeight + this.velocity.y <= canvas.height ){
+        if(this.position.y + (this.spriteHeight-20) + this.velocity.y <= canvas.height ){
             this.velocity.y += gravity/2;
+            //this.jumping = false;
         } else {
             this.velocity.y = 0;
+            //this.jumping = false;
         }
 
         // jump when directly under banana
-        if ( gameFrame % 200 ==0 && !this.jumping && this.position.y > banana.position.y &&
+        if (!this.jumping && this.position.y > banana.position.y &&
              (between(bananaPositionXCorrection - this.position.x, -3, 3)
              || between(this.position.x - bananaPositionXCorrection , -3, 3))) {
             this.jumping = true;
             this.velocity.y =  this.jumpingHeight;
         }
         if (this.jumping){ this.velocity.x = (banana.position.x - this.position.x - tile_size * 2) * 0.05; 
-        }else{ this.velocity.x = (banana.position.x - this.position.x - tile_size * 0.5) * this.speed; }
+        }else{ 
+            this.velocity.x = (banana.position.x - this.position.x /*- tile_size * .5*/) * this.speed; 
+        }
     
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
         this.velocity.y *= friction;
     
         if (this.position.y > floor) { this.position.y = floor; this.jumping = false; }
+        if (this.velocity.y == 0) { this.jumping = false; }
         
         if(this.onHitbox){
             this.position.y = holdY;
+            this.jumping = false;
         }
         this.hitboxPositionX = this.position.x;
         this.hitboxPositionY = this.position.y;
+
     }
 }
 const player1 = new Player();
@@ -163,9 +193,9 @@ const player2 = new Player();
 const player3 = new Player();
 const players = [player1,player2, player3];
 player2.setPositionX(canvas.width);
-player2.setSpeed(0.08);
+player2.setSpeed(0.05);
 player2.setJumpingHeight(-14);
-player3.setSpeed(0.02);
+player3.setSpeed(0.012);
 player3.setJumpingHeight(-15);
 
 
@@ -228,7 +258,10 @@ function animate(){
         currentIndex = players.indexOf(player);
         player.update(players, currentIndex);
     })
+    //console.log(player1.jumping, player1.onHitbox);
     banana.update();
+    //console.log(player1.velocity.y);
+    gameFrame++;
 }
 
 animate();
