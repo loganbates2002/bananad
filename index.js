@@ -5,7 +5,7 @@ canvas.height = window.innerHeight;
 
 let gameFrame = 0;
 let gameSpeed = 1;
-let staggerFrames = 5;
+let staggerFrames = 10;
 gameOver = false;
 dragging = false;
 var friction = 1;
@@ -39,13 +39,6 @@ function between(x, min, max) {
   }
 
 // Player 
-/*
-const playerLeft = new Image();
-playerLeft.src = 'Images/monkey4.png';
-const playerRight = new Image();
-playerRight.src = 'Images/monkey3.png';
-*/
-
 const spriteSheet = new Image();
 spriteSheet.src = 'Images/MonkeySpriteSheetRed.png';
 const gravity = 1.5;
@@ -67,10 +60,9 @@ class Player {
         this.frame = 0;
         this.spriteWidth = 49;
         this.spriteHeight = 52;
-        //this.behavior = behavior;
         this.jumping = true;
-        this.jumpingHeight = -35;
-        this.speed = 0.01;
+        this.jumpingHeight = -15;
+        this.speed = 0.025;
         this.hitboxHeight = 30;
         this.hitboxWidth = 35;
         this.hitboxPositionX = this.position.x;
@@ -97,31 +89,36 @@ class Player {
                 this.spriteWidth, this.spriteHeight, this.position.x-35, 
                 this.position.y - 61, this.radius*3, this.radius*3.5);
         } else {
-            if(this.frameY == 3){ this.frameY = 2;}
-            c.drawImage(spriteSheet, this.spriteWidth * this.frameX, this.spriteHeight * (this.frameY+1),
+            if(this.frameY == 1){ this.frameY = 2;}
+            c.drawImage(spriteSheet, this.spriteWidth * this.frameX, this.spriteHeight * this.frameY,
                 this.spriteWidth, this.spriteHeight, this.position.x-35, 
                 this.position.y - 54, this.radius*3, this.radius*3.5);
         }
     }
-    update(players, currentIndex){
-        this.draw();
-
-        //loops through frames of sprite sheet
-        console.log(this.jumpingHeight, this.velocity.y);
-        if(this.velocity.y < 0 && this.jumping){ 
+    spriteSheetAnimation(){
+        if(this.velocity.y < 0){ 
             this.frameY = 3;
         }else if(this.velocity.y > 0){
             this.frameY = 0;
         }else{
             this.frameY = 1;
         }
-            if(this.frame % staggerFrames == 0 ){
-                if(this.frameX > 0){ 
-                    this.frameX--; 
-                } else { 
-                    this.frameX = 3; 
-                }
+        var xVelocityInt = parseInt(this.velocity.x, 10)
+        console.log(xVelocityInt)
+        if(this.frame % (staggerFrames / Math.abs(xVelocityInt)) == 0 ){
+            if(this.frameX > 0){ 
+                this.frameX--; 
+            } else { 
+                this.frameX = 3; 
             }
+        }
+    }
+    update(players, currentIndex){
+        this.spriteSheetAnimation();
+        this.draw();
+
+        //loops through frames of sprite sheet
+        //console.log(this.jumpingHeight, this.velocity.y);
         this.frame ++;
         
 
@@ -173,7 +170,6 @@ class Player {
         if (this.jumping){ this.velocity.x = (banana.position.x - this.position.x - tile_size * 2) * 0.05; 
         }else{ 
             this.velocity.x = (banana.position.x - this.position.x /*- tile_size * .5*/) * this.speed; 
-            //this.jumping = false;
         }
     
         this.position.x += this.velocity.x;
@@ -190,7 +186,6 @@ class Player {
         this.hitboxPositionX = this.position.x;
         this.hitboxPositionY = this.position.y;
 
-
     }
 }
 const player1 = new Player();
@@ -198,7 +193,7 @@ const player2 = new Player();
 const player3 = new Player();
 const players = [player1,player2, player3];
 player2.setPositionX(canvas.width);
-player2.setSpeed(0.08);
+player2.setSpeed(0.05);
 player2.setJumpingHeight(-14);
 player3.setSpeed(0.012);
 player3.setJumpingHeight(-15);
