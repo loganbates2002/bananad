@@ -1,7 +1,16 @@
+let gameloop = new GameLoop();
+
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+
+gameloop.canvas = canvas;
+gameloop.c = c;
+gameloop.canvas.width = canvas.width;
+gameloop.canvas.height = canvas.height;
+console.log(gameloop);
+
 
 let gameFrame = 0;
 let gameSpeed = 1;
@@ -12,7 +21,7 @@ var friction = 1;
 var tile_size = 16;
 var map_columns = 16;
 var map_scale = 1;
-var floor = canvas.height - canvas.height/25
+var floor = gameloop.canvas.height - gameloop.canvas.height/25 
 
 // Mouse Interactivity
 let canvasPosition = canvas.getBoundingClientRect();
@@ -37,6 +46,13 @@ canvas.addEventListener('mouseup', function(){
 function between(x, min, max) {
     return x >= min && x <= max;
   }
+function toggleScreen(id,toggle) {
+    let element = document.getElementById(id);
+    let display = ( toggle ) ? 'block' : 'none';
+    element.style.display = display;
+}
+
+
 
 // Player 
 const spriteSheet = new Image();
@@ -251,7 +267,7 @@ function handleBackground(){
 
 function animate(){
     requestAnimationFrame(animate);
-    c.clearRect(0,0, canvas.width, canvas.height);
+    gameloop.c.clearRect(0,0, canvas.width, canvas.height);
     handleBackground();
 
     players.forEach((player) => {
@@ -264,7 +280,10 @@ function animate(){
     gameFrame++;
 }
 
-animate();
+function startGame(){
+    gameloop.start();
+    animate();
+}
 
 window.addEventListener('resize', function(){
     canvasPosition = canvas.getBoundingClientRect();

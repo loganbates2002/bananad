@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>bananad</title>
+        <script src='gameloop.js' defer></script>
+        <script src='index.js' defer></script>
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        <style>
-            body{
-                margin: 0;
-            }
-        </style>
-        <canvas id="canvas"></canvas>
-        <script src="index.js"></script>
+        <div id='start-screen' class='screen' style='display:block'>
+            <button onclick='startGame()'>Start Game</button>
+        </div>
+        <canvas id="canvas" style='display:none'></canvas>
     </body>
 </html>
