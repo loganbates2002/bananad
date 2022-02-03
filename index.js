@@ -9,7 +9,7 @@ gameloop.canvas = canvas;
 gameloop.c = c;
 gameloop.canvas.width = canvas.width;
 gameloop.canvas.height = canvas.height;
-console.log(gameloop);
+//console.log(gameloop);
 
 
 let gameFrame = 0;
@@ -22,6 +22,7 @@ var tile_size = 16;
 var map_columns = 16;
 var map_scale = 1;
 var floor = gameloop.canvas.height - gameloop.canvas.height/25 
+var finishStart = false;
 
 // Mouse Interactivity
 let canvasPosition = canvas.getBoundingClientRect();
@@ -120,7 +121,7 @@ class Player {
             this.frameY = 1;
         }
         var xVelocityInt = parseInt(this.velocity.x, 10)
-        console.log(xVelocityInt)
+        //console.log(xVelocityInt)
         if(this.frame % (staggerFrames / Math.abs(xVelocityInt)) == 0 ){
             if(this.frameX > 0){ 
                 this.frameX--; 
@@ -224,8 +225,8 @@ aura.src = 'Images/aura.png';
 class Banana {
     constructor() {
         this.position = {
-            x: canvas.width/2,
-            y: canvas.height/2
+            x: canvas.width/2.043,
+            y: canvas.height/2.39
         };
         this.velocity = {
             x: 0,
@@ -240,17 +241,17 @@ class Banana {
         this.spriteHeight = 31;
     }
     draw(){
-        c.drawImage(aura, this.position.x - 75, this.position.y - 70, this.radius*10, this.radius*10);
-        c.drawImage(bananaPic, this.position.x - 14, this.position.y - 15, this.radius*2, this.radius*2);
+        c.drawImage(aura, this.position.x -57, this.position.y - 50, this.radius*10, this.radius*10);
+        c.drawImage(bananaPic, this.position.x , this.position.y , this.radius*2, this.radius*2);
     }
     update(){
         this.draw();
         const dx = this.position.x - mouse.x
         const dy = this.position.y - mouse.y
         let distance = Math.sqrt(dx*dx + dy*dy);
-        if(distance < this.radius+200 && mouse.click){
-            this.position.x = mouse.x;
-            this.position.y = mouse.y;
+        if(distance < this.radius+100 && mouse.click){
+            this.position.x = mouse.x - 10;
+            this.position.y = mouse.y - 10;
         }
     }
 }
@@ -278,11 +279,49 @@ function animate(){
     banana.update();
     //console.log(player1.velocity.y);
     gameFrame++;
+    //console.log(gameFrame);
+}
+
+function drawCircle(newLineWidth){
+    c.lineWidth = newLineWidth;
+    c.strokeStyle = 'white';
+    c.stroke();
+    c.arc(canvas.width/2.015, canvas.height/2.28, 1000,0, 2*Math.PI, true);
+    c.stroke();
+}
+
+function openScreen(){
+    newLineWidth = 2000;
+    if(newLineWidth - (gameFrame*2) > 10){
+        c.clearRect(0,0, canvas.width, canvas.height);
+        handleBackground();
+        newLineWidth = newLineWidth - (gameFrame*2);
+        drawCircle(newLineWidth);
+        banana.update();
+        //console.log(newLineWidth);
+        gameFrame += 1;
+        gameFrame *= 1.08;
+        requestAnimationFrame(openScreen);
+    } else {
+        newLineWidth = 10;
+        gameFrame = 1;
+    }
+    newLineWidth = 10;
 }
 
 function startGame(){
-    gameloop.start();
-    animate();
+    var el = document.getElementById('textBox');
+    el.remove();
+    console.log(gameFrame);
+    if(gameFrame == 0){
+        openScreen();
+        gameloop.start();
+    }
+
+    console.log(gameFrame);
+    console.log(newLineWidth);
+
+    setTimeout(function(){animate();}, 2000);
 }
 
 window.addEventListener('resize', function(){

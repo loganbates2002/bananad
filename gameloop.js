@@ -1,13 +1,11 @@
 class GameLoop {
 
   constructor() {
-      this.fps = 60;
       this.c = null;
       this.canvas = null;
-      this.loop = null;
   }
 
-  prepareCanvas() {
+  initializeCanvas() {
       this.canvas = document.getElementById('canvas');
       this.c = this.canvas.getContext('2d');
       document.body.style.margin = 0;
@@ -25,7 +23,7 @@ class GameLoop {
   start() {
       this.toggleScreen('start-screen',false);
       this.toggleScreen('canvas',true);
-      this.prepareCanvas();
+      this.initializeCanvas();
   }
 
   toggleScreen(id,toggle) {

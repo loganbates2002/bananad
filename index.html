@@ -7,8 +7,17 @@
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
+        <div class="text-box" id="textBox">
+            <span>banAnad</span>
+        </div>
+        <script>
+            textBox.addEventListener("mouseover", function(){
+                textBox.style.animation = "shadowFade 5s";
+                textBox.style.textShadow = "0px 0px 30px rgba(0,0,0,0.4)";
+            });
+        </script>
         <div id='start-screen' class='screen' style='display:block'>
-            <button onclick='startGame()'>Start Game</button>
+            <button onclick='startGame()'></button>
         </div>
         <canvas id="canvas" style='display:none'></canvas>
     </body>
