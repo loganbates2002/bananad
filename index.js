@@ -23,6 +23,8 @@ var map_columns = 16;
 var map_scale = 1;
 var floor = gameloop.canvas.height - gameloop.canvas.height/25 
 var finishStart = false;
+var monkeys = [];
+var monkeyTimer = 10;
 
 // Mouse Interactivity
 let canvasPosition = canvas.getBoundingClientRect();
@@ -61,9 +63,9 @@ spriteSheet.src = 'Images/MonkeySpriteSheetRed.png';
 const gravity = 1.5;
 
 class Player {
-    constructor(){
+    constructor(speed, jumpingHeight, positionX){
         this.position = {
-            x: 0,
+            x: positionX,
             y: canvas.height
         };
         this.velocity = {
@@ -78,8 +80,8 @@ class Player {
         this.spriteWidth = 49;
         this.spriteHeight = 52;
         this.jumping = true;
-        this.jumpingHeight = -15;
-        this.speed = 0.025;
+        this.jumpingHeight = jumpingHeight;
+        this.speed = speed;
         this.hitboxHeight = 30;
         this.hitboxWidth = 35;
         this.hitboxPositionX = this.position.x;
@@ -205,15 +207,9 @@ class Player {
 
     }
 }
-const player1 = new Player();
-const player2 = new Player();
-const player3 = new Player();
-const players = [player1,player2, player3];
-player2.setPositionX(canvas.width);
-player2.setSpeed(0.05);
-player2.setJumpingHeight(-14);
-player3.setSpeed(0.012);
-player3.setJumpingHeight(-15);
+
+const players = [];
+
 
 
 // Banana
@@ -266,19 +262,30 @@ function handleBackground(){
     c.drawImage(backgroundTrees, 0, 0, canvas.width, canvas.height);
 }
 
+function addPlayers(players){
+    setInterval(() => {
+        const speed = Math.random() * (0.05 - 0.012) + 0.012;
+        const jumpingHeight = -(Math.random() * (18 - 10) + 10);
+        const positionX = (Math.round(Math.random())) * canvas.width;
+        players.push( new Player(speed, jumpingHeight, positionX));
+    }, 5000 - monkeyTimer)
+}
+
 function animate(){
     requestAnimationFrame(animate);
     gameloop.c.clearRect(0,0, canvas.width, canvas.height);
     handleBackground();
 
+//loops through players array and updates each monkey every frame
     players.forEach((player) => {
         currentIndex = players.indexOf(player);
         player.update(players, currentIndex);
     })
-    //console.log(player1.jumping, player1.onHitbox);
+
+
     banana.update();
-    //console.log(player1.velocity.y);
     gameFrame++;
+    monkeyTimer = monkeyTimer * 1.5;
     //console.log(gameFrame);
 }
 
@@ -312,16 +319,19 @@ function openScreen(){
 function startGame(){
     var el = document.getElementById('textBox');
     el.remove();
-    console.log(gameFrame);
+    //console.log(gameFrame);
     if(gameFrame == 0){
         openScreen();
         gameloop.start();
     }
 
-    console.log(gameFrame);
-    console.log(newLineWidth);
+    //console.log(gameFrame);
+    //console.log(newLineWidth);
 
-    setTimeout(function(){animate();}, 2000);
+    setTimeout(function(){
+        animate();
+        addPlayers(players);
+    }, 2000);
 }
 
 window.addEventListener('resize', function(){
