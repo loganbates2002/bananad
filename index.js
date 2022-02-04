@@ -1,7 +1,16 @@
+let gameloop = new GameLoop();
+
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+
+gameloop.canvas = canvas;
+gameloop.c = c;
+gameloop.canvas.width = canvas.width;
+gameloop.canvas.height = canvas.height;
+//console.log(gameloop);
+
 
 let gameFrame = 0;
 let gameSpeed = 1;
@@ -12,7 +21,10 @@ var friction = 1;
 var tile_size = 16;
 var map_columns = 16;
 var map_scale = 1;
-var floor = canvas.height - canvas.height/25
+var floor = gameloop.canvas.height - gameloop.canvas.height/25 
+var finishStart = false;
+var monkeys = [];
+var monkeyTimer = 10;
 
 // Mouse Interactivity
 let canvasPosition = canvas.getBoundingClientRect();
@@ -37,6 +49,13 @@ canvas.addEventListener('mouseup', function(){
 function between(x, min, max) {
     return x >= min && x <= max;
   }
+function toggleScreen(id,toggle) {
+    let element = document.getElementById(id);
+    let display = ( toggle ) ? 'block' : 'none';
+    element.style.display = display;
+}
+
+
 
 // Player 
 const spriteSheet = new Image();
@@ -44,9 +63,9 @@ spriteSheet.src = 'Images/MonkeySpriteSheetRed.png';
 const gravity = 1.5;
 
 class Player {
-    constructor(){
+    constructor(speed, jumpingHeight, positionX){
         this.position = {
-            x: 0,
+            x: positionX,
             y: canvas.height
         };
         this.velocity = {
@@ -61,8 +80,8 @@ class Player {
         this.spriteWidth = 49;
         this.spriteHeight = 52;
         this.jumping = true;
-        this.jumpingHeight = -15;
-        this.speed = 0.025;
+        this.jumpingHeight = jumpingHeight;
+        this.speed = speed;
         this.hitboxHeight = 30;
         this.hitboxWidth = 35;
         this.hitboxPositionX = this.position.x;
@@ -104,7 +123,7 @@ class Player {
             this.frameY = 1;
         }
         var xVelocityInt = parseInt(this.velocity.x, 10)
-        console.log(xVelocityInt)
+        //console.log(xVelocityInt)
         if(this.frame % (staggerFrames / Math.abs(xVelocityInt)) == 0 ){
             if(this.frameX > 0){ 
                 this.frameX--; 
@@ -188,15 +207,9 @@ class Player {
 
     }
 }
-const player1 = new Player();
-const player2 = new Player();
-const player3 = new Player();
-const players = [player1,player2, player3];
-player2.setPositionX(canvas.width);
-player2.setSpeed(0.05);
-player2.setJumpingHeight(-14);
-player3.setSpeed(0.012);
-player3.setJumpingHeight(-15);
+
+const players = [];
+
 
 
 // Banana
@@ -208,8 +221,8 @@ aura.src = 'Images/aura.png';
 class Banana {
     constructor() {
         this.position = {
-            x: canvas.width/2,
-            y: canvas.height/2
+            x: canvas.width/2.043,
+            y: canvas.height/2.39
         };
         this.velocity = {
             x: 0,
@@ -224,17 +237,17 @@ class Banana {
         this.spriteHeight = 31;
     }
     draw(){
-        c.drawImage(aura, this.position.x - 75, this.position.y - 70, this.radius*10, this.radius*10);
-        c.drawImage(bananaPic, this.position.x - 14, this.position.y - 15, this.radius*2, this.radius*2);
+        c.drawImage(aura, this.position.x -57, this.position.y - 50, this.radius*10, this.radius*10);
+        c.drawImage(bananaPic, this.position.x , this.position.y , this.radius*2, this.radius*2);
     }
     update(){
         this.draw();
         const dx = this.position.x - mouse.x
         const dy = this.position.y - mouse.y
         let distance = Math.sqrt(dx*dx + dy*dy);
-        if(distance < this.radius+200 && mouse.click){
-            this.position.x = mouse.x;
-            this.position.y = mouse.y;
+        if(distance < this.radius+100 && mouse.click){
+            this.position.x = mouse.x - 10;
+            this.position.y = mouse.y - 10;
         }
     }
 }
@@ -249,22 +262,77 @@ function handleBackground(){
     c.drawImage(backgroundTrees, 0, 0, canvas.width, canvas.height);
 }
 
+function addPlayers(players){
+    setInterval(() => {
+        const speed = Math.random() * (0.05 - 0.012) + 0.012;
+        const jumpingHeight = -(Math.random() * (18 - 10) + 10);
+        const positionX = (Math.round(Math.random())) * canvas.width;
+        players.push( new Player(speed, jumpingHeight, positionX));
+    }, 5000 - monkeyTimer)
+}
+
 function animate(){
     requestAnimationFrame(animate);
-    c.clearRect(0,0, canvas.width, canvas.height);
+    gameloop.c.clearRect(0,0, canvas.width, canvas.height);
     handleBackground();
 
+//loops through players array and updates each monkey every frame
     players.forEach((player) => {
         currentIndex = players.indexOf(player);
         player.update(players, currentIndex);
     })
-    //console.log(player1.jumping, player1.onHitbox);
+
+
     banana.update();
-    //console.log(player1.velocity.y);
     gameFrame++;
+    monkeyTimer = monkeyTimer * 1.5;
+    //console.log(gameFrame);
 }
 
-animate();
+function drawCircle(newLineWidth){
+    c.lineWidth = newLineWidth;
+    c.strokeStyle = 'white';
+    c.stroke();
+    c.arc(canvas.width/2.015, canvas.height/2.28, 1000,0, 2*Math.PI, true);
+    c.stroke();
+}
+
+function openScreen(){
+    newLineWidth = 2000;
+    if(newLineWidth - (gameFrame*2) > 10){
+        c.clearRect(0,0, canvas.width, canvas.height);
+        handleBackground();
+        newLineWidth = newLineWidth - (gameFrame*2);
+        drawCircle(newLineWidth);
+        banana.update();
+        //console.log(newLineWidth);
+        gameFrame += 1;
+        gameFrame *= 1.08;
+        requestAnimationFrame(openScreen);
+    } else {
+        newLineWidth = 10;
+        gameFrame = 1;
+    }
+    newLineWidth = 10;
+}
+
+function startGame(){
+    var el = document.getElementById('textBox');
+    el.remove();
+    //console.log(gameFrame);
+    if(gameFrame == 0){
+        openScreen();
+        gameloop.start();
+    }
+
+    //console.log(gameFrame);
+    //console.log(newLineWidth);
+
+    setTimeout(function(){
+        animate();
+        addPlayers(players);
+    }, 2000);
+}
 
 window.addEventListener('resize', function(){
     canvasPosition = canvas.getBoundingClientRect();
