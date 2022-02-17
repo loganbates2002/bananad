@@ -28,6 +28,9 @@ var monkeyTimer = 10;
 var interval = 5000
 var finalCircleX = 0;
 var finalCircleY = 0;
+const finalMonkey = new Image();
+finalMonkey.src = 'Images/FinalMonkey.png';
+var finalMonkeyX = canvas.height+2000;
 
 // Mouse Interactivity
 let canvasPosition = canvas.getBoundingClientRect();
@@ -287,7 +290,7 @@ function addPlayers(players){
         } else {
             step = 50
         }
-        console.log(step);
+        //console.log(step);
         addPlayers(players);
     }, step )
 }
@@ -355,11 +358,12 @@ function closeScreen(){
             closeRadius = 5
         }
         drawCircle(closeRadius, finalCircleX+15, finalCircleY+20);
-        console.log(finalCircleX, finalCircleY);
-        closeMultiplier += .2;
+       // console.log(finalCircleX, finalCircleY);
+        closeMultiplier += 1;
         requestAnimationFrame(closeScreen);
     } else {
-        c.clearRect(0,0, canvas.width, canvas.height);
+        //c.clearRect(0,0, canvas.width, canvas.height);
+        /*
         banana.update();
         const speedFin = 0.03;
         const jumpingHeightFin = canvas.height - banana.position.y;
@@ -369,13 +373,15 @@ function closeScreen(){
             players.pop();
         }
         players.push(finalMonkey);
-        console.log(players);
-        endGame(finalMonkey);
+       // console.log(players);
+       */
+        endAnimation();
     }
 
 }
 
 function endGame(){
+    /*
     c.clearRect(0,0, canvas.width, canvas.height);
     players.forEach((player) => {
         currentIndex = players.indexOf(player);
@@ -384,7 +390,29 @@ function endGame(){
     banana.update();
     location.reload();
     requestAnimationFrame(endGame);
+    */
+   //create seperate animate loop
+   // create sprite and set to left side 
+   //while sprite is not < caanvaswidth+something xpos++
+   // if sprite x pos is > banana, dont update banana
+   // after finish refresh page
     
+}
+
+function endAnimation(){
+    c.clearRect(0,0, canvas.width, canvas.height);
+    if(finalMonkeyX > -3500){
+        c.drawImage(finalMonkey, finalMonkeyX, banana.position.y-900, 2500, 2000);
+        if(finalMonkeyX > banana.position.x-490){
+            banana.update();
+        }
+        finalMonkeyX -= 20;
+        console.log(finalMonkeyX);
+
+        requestAnimationFrame(endAnimation);
+    } else {
+        location.reload();
+    }
 }
 
 function startGame(){
