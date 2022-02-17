@@ -1,5 +1,4 @@
 let gameloop = new GameLoop();
-
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
 canvas.width = window.innerWidth;
@@ -9,8 +8,6 @@ gameloop.canvas = canvas;
 gameloop.c = c;
 gameloop.canvas.width = canvas.width;
 gameloop.canvas.height = canvas.height;
-//console.log(gameloop);
-
 
 let gameFrame = 0;
 let gameSpeed = 1;
@@ -105,10 +102,6 @@ class Player {
     }
 
     draw(){
-        /* draw hitbox
-        c.fillStyle = 'blue';
-        c.fillRect(this.hitboxPositionX, this.hitboxPositionY, this.hitboxWidth, this.hitboxHeight); */
-
         if( this.position.x >= banana.position.x){
             c.drawImage(spriteSheet, this.spriteWidth * this.frameX, this.spriteHeight * this.frameY,
                 this.spriteWidth, this.spriteHeight, this.position.x-35, 
@@ -128,8 +121,7 @@ class Player {
         }else{
             this.frameY = 1;
         }
-        var xVelocityInt = parseInt(this.velocity.x, 10)
-        //console.log(xVelocityInt)
+        var xVelocityInt = parseInt(this.velocity.x, 10);
         if(this.frame % (staggerFrames / Math.abs(xVelocityInt)) == 0 ){
             if(this.frameX > 0){ 
                 this.frameX--; 
@@ -141,12 +133,7 @@ class Player {
     update(players, currentIndex){
         this.spriteSheetAnimation();
         this.draw();
-
-        //loops through frames of sprite sheet
-        //console.log(this.jumpingHeight, this.velocity.y);
         this.frame ++;
-        
-
         const dx = this.position.x - mouse.x;
         const dy = this.position.y - mouse.y;
         let theta = Math.atan2(dy, dx);
@@ -167,7 +154,6 @@ class Player {
                             this.jumping = false;
                             this.onHitbox = true;
                             holdY = this.position.y;
-                            //console.log("hit");
                     } else {
                         this.onHitbox = false;
                     }
@@ -179,10 +165,8 @@ class Player {
 
         if(this.position.y + (this.spriteHeight-20) + this.velocity.y <= canvas.height ){
             this.velocity.y += gravity/2;
-            //this.jumping = false;
         } else {
             this.velocity.y = 0;
-            //this.jumping = false;
         }
 
         // jump when directly under banana
@@ -194,7 +178,7 @@ class Player {
         }
         if (this.jumping){ this.velocity.x = (banana.position.x - this.position.x - tile_size * 2) * 0.05; 
         }else{ 
-            this.velocity.x = (banana.position.x - this.position.x /*- tile_size * .5*/) * this.speed; 
+            this.velocity.x = (banana.position.x - this.position.x) * this.speed; 
         }
     
         this.position.x += this.velocity.x;
@@ -220,20 +204,15 @@ class Player {
             cancelAnimationFrame(animationId)
             closeScreen();
         }
-
     }
 }
-
 const players = [];
-
-
 
 // Banana
 const bananaPic = new Image();
 bananaPic.src = 'Images/banana4.png';
 const aura = new Image();
 aura.src = 'Images/aura.png';
-
 class Banana {
     constructor() {
         this.position = {
@@ -290,7 +269,6 @@ function addPlayers(players){
         } else {
             step = 50
         }
-        //console.log(step);
         addPlayers(players);
     }, step )
 }
@@ -300,17 +278,13 @@ function animate(){
     animationId = requestAnimationFrame(animate);
     gameloop.c.clearRect(0,0, canvas.width, canvas.height);
     handleBackground();
-
-//loops through players array and updates each monkey every frame
+    //loops through players array and updates each monkey every frame
     players.forEach((player) => {
         currentIndex = players.indexOf(player);
         player.update(players, currentIndex);
     })
-
-
     banana.update();
     gameFrame++;
-    //console.log(gameFrame);
 }
 
 function drawCenterCircle(newLineWidth){
@@ -337,7 +311,6 @@ function openScreen(){
         newLineWidth = newLineWidth - (gameFrame*2);
         drawCenterCircle(newLineWidth);
         banana.update();
-        //console.log(newLineWidth);
         gameFrame += 1;
         gameFrame *= 1.08;
         requestAnimationFrame(openScreen);
@@ -350,7 +323,6 @@ function openScreen(){
 var closeRadius = 1500;
 var closeMultiplier = 1;
 function closeScreen(){
-   // drawCircle(closeRadius, finalCircleX+15, finalCircleY+20);
     if(closeRadius > 10){
         if((closeRadius - closeMultiplier) > 0){
             closeRadius = closeRadius - closeMultiplier;
@@ -358,45 +330,12 @@ function closeScreen(){
             closeRadius = 5
         }
         drawCircle(closeRadius, finalCircleX+15, finalCircleY+20);
-       // console.log(finalCircleX, finalCircleY);
         closeMultiplier += 1;
         requestAnimationFrame(closeScreen);
     } else {
-        //c.clearRect(0,0, canvas.width, canvas.height);
-        /*
-        banana.update();
-        const speedFin = 0.03;
-        const jumpingHeightFin = canvas.height - banana.position.y;
-        const positionXFin = 0;
-        const finalMonkey = new Player(speedFin, jumpingHeightFin, positionXFin);
-        while(players.length) {
-            players.pop();
-        }
-        players.push(finalMonkey);
-       // console.log(players);
-       */
         endAnimation();
     }
 
-}
-
-function endGame(){
-    /*
-    c.clearRect(0,0, canvas.width, canvas.height);
-    players.forEach((player) => {
-        currentIndex = players.indexOf(player);
-        player.update(players, currentIndex);
-    })
-    banana.update();
-    location.reload();
-    requestAnimationFrame(endGame);
-    */
-   //create seperate animate loop
-   // create sprite and set to left side 
-   //while sprite is not < caanvaswidth+something xpos++
-   // if sprite x pos is > banana, dont update banana
-   // after finish refresh page
-    
 }
 
 function endAnimation(){
@@ -407,8 +346,6 @@ function endAnimation(){
             banana.update();
         }
         finalMonkeyX -= 20;
-        console.log(finalMonkeyX);
-
         requestAnimationFrame(endAnimation);
     } else {
         location.reload();
@@ -424,8 +361,6 @@ function startGame(){
         gameloop.start();
     }
 
-    //console.log(gameFrame);
-    //console.log(newLineWidth);
     const speed1 = Math.random() * (0.05 - 0.012) + 0.012;
     const jumpingHeight1 = -(Math.random() * (25 - 10) + 10);
     const positionX1 = (Math.round(Math.random())) * canvas.width;
