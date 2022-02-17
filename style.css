@@ -11,14 +11,6 @@ body{
     justify-content: center;
     align-items: center;
 }
-/*
-#canvas1 {
-    width: view-width(vw);
-    height: view-height(vh);
-    /*border: 5px solid rgb(3, 3, 3);
-
-    /*background-image: src="Images/treebackground.png";
-} */
 button {
     border:none;
     appearance:none;
