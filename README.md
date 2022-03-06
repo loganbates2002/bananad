@@ -1,7 +1,7 @@
 # banAnad
 **Click the [banana](https://bananad.000webhostapp.com/) to begin**
 
-Web game coded in javascript
+Web game coded in Javascript
 
 Inspired by [The Useless Web](https://theuselessweb.com/) 
 
