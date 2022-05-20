@@ -1,6 +1,8 @@
 # banAnad
 **Click the [banana](https://bananad.000webhostapp.com/) to begin**
 
+Goal: keep the banana away from the monkeys
+
 Web game coded in Javascript, watch a demonstration of the game here:
 https://youtu.be/d2ADhYRdWoA
 
